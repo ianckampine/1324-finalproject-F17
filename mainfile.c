@@ -26,7 +26,6 @@ struct body_temperature
     double temp;
     char mW[2];
 };
-
 struct heart_rate
 {
     double timestamp;
@@ -35,11 +34,17 @@ struct heart_rate
 };
 
 
+/// Declare a few arrays of data from the struct to hold everything.
+struct blood_pressure BP[45];
+struct body_temperature BT[43];
+struct heart_rate HR[25];
 
 
 
 /// Handles all user input and output. This is effectively the main menu function.
 void main() {
+
+
 
     /// Setting up basic variables for flow control
     /// as well as critical parameters.
@@ -53,10 +58,7 @@ void main() {
     char path_to_folder[255];
     char option;
 
-    /// Declare a few arrays of data from the struct to hold everything.
-    struct blood_pressure BP[45];
-    struct body_temperature BT[43];
-    struct heart_rate HR[25];
+
 
 
     /// Main menu loop/main logic loop.
