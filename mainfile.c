@@ -9,7 +9,15 @@
 
 /// Function declarations.
 void readDataIn(char path_to_folder[255]);
-
+double meanT(double timestart, double timestop);
+double meanBP(double timestart, double timestop, int sys);
+double meanHR(double timestart, double timestop);
+double sdT(double timestart, double timestop);
+double sdBP(double timestart, double timestop, int sys);
+double sdHR(double timestart, double timestop);
+double minMaxT(double timestart, double timestop);
+double minMaxBP(double timestart, double timestop, int sys);
+double minMaxHR(double timestart, double timestop);
 
 
 /// Struct declarations.
@@ -26,12 +34,15 @@ struct body_temperature
     double temp;
     char mW[2];
 };
+
 struct heart_rate
 {
     double timestamp;
     double rate;
     char permin[6];
 };
+
+
 
 
 /// Declare a few arrays of data from the struct to hold everything.
@@ -41,11 +52,13 @@ struct heart_rate HR[25];
 
 
 
+
 /// Handles all user input and output. This is effectively the main menu function.
 void main() {
 
 
 
+    /// Declare a few arrays of data from the struct to hold everything.
     /// Setting up basic variables for flow control
     /// as well as critical parameters.
     int running = 1;
@@ -57,7 +70,6 @@ void main() {
     double time_for_score;
     char path_to_folder[255];
     char option;
-
 
 
 
@@ -83,7 +95,7 @@ void main() {
             case 'a' :
                 printf("Please enter the location of the input files. Please use a relative path. \n");
                 scanf('%s', &path_to_folder);
-                /// ***PASS THIS RECORDED PATH TO THE DATA INPUT/FILE READING FUNCTION***
+                readDataIn(path_to_folder);
                 folder_loc_set = 1;
                 printf("Folder location set to %s \n", path_to_folder);
                 break;
@@ -95,6 +107,7 @@ void main() {
                if(!folder_loc_set) {
                     printf("Please set the path to the folder before setting a time period for calculations. Use option a) in the previous menu. \n");
                } else {
+                    printf("This program will automatically handle any stop time values exceeding the size of the dataset. \n");
                     printf("Please enter the start time (in seconds) for the desired time interval. \n");
                     scanf('%f', &time_start);
                     printf("Please enter the stop time (in seconds) for the desired time interval. \n");
@@ -115,7 +128,7 @@ void main() {
                     printf("Error. Stop time cannot be negative. Negative time is nonsense. \n");
                     time_interval_set = 0;
                }
-               if(time_stop = time_start) {
+               if(time_stop == time_start) {
                     printf("Error. Values may not be equal. This is not an interval. \n");
                     time_interval_set = 0;
                }
@@ -153,7 +166,7 @@ void main() {
             case 'd' :
                 /// Need data to be loaded and also need to know the time interval to calculate the desired statistics.
                 if(!folder_loc_set || !time_interval_set) {
-                    printf("Error. Must specify the time interval for analysis and/or specify the location of the input sensor data before calculating statistics. \n");
+                    printf("Error. Must specify the time interval for analysis and specify the location of the input sensor data before calculating statistics. \n");
                 } else {
                     /// PERFORM THE CALCULATIONS ON STATISTICAL PARAMETERS
                 }
@@ -326,5 +339,53 @@ void readDataIn(char path_to_folder[255]) {
         }
 }
 
+
+
+double meanT(double timestart, double timestop) {
+    float sum = 0;
+    int count;
+    for(count = 0; count <  )
+}
+
+
+
+double meanBP(double timestart, double timestop, int sys) {
+}
+
+
+
+
+double meanHR(double timestart, double timestop) {
+}
+
+
+
+double sdT(double timestart, double timestop) {
+}
+
+
+
+double sdBP(double timestart, double timestop, int sys) {
+}
+
+
+
+double sdHR(double timestart, double timestop) {
+}
+
+
+
+double minMaxT(double timestart, double timestop) {
+}
+
+
+
+double minMaxBP(double timestart, double timestop) {
+}
+
+
+
+double minMaxHR(double timestart, double timestop) {
+}
 
 
