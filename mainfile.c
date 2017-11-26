@@ -7,6 +7,13 @@
 #include <string.h>
 
 
+
+#define NUM_HR_MEASUREMENTS 25
+#define NUM_BP_MEASUREMENTS 45
+#define NUM_T_MEASUREMENTS 43
+
+
+
 /// Function declarations.
 void readDataIn(char path_to_folder[255]);
 double meanT(double timestart, double timestop);
@@ -18,6 +25,7 @@ double sdHR(double timestart, double timestop);
 double minMaxT(double timestart, double timestop);
 double minMaxBP(double timestart, double timestop, int sys);
 double minMaxHR(double timestart, double timestop);
+
 
 
 /// Struct declarations.
@@ -45,10 +53,10 @@ struct heart_rate
 
 
 
-/// Declare a few arrays of data from the struct to hold everything.
-struct blood_pressure BP[45];
-struct body_temperature BT[43];
-struct heart_rate HR[25];
+/// Declare a few arrays of data from the structs to hold everything.
+struct blood_pressure BP[NUM_BP_MEASUREMENTS];
+struct body_temperature BT[NUM_T_MEASUREMENTS];
+struct heart_rate HR[NUM_HR_MEASUREMENTS];
 
 
 
@@ -130,7 +138,8 @@ void main() {
                }
                if(time_stop == time_start) {
                     printf("Error. Values may not be equal. This is not an interval. \n");
-                    time_interval_set = 0;
+                    time_interval_set = 0;double meanSysBP(double timestart, double timestop) {
+}
                }
 
                /// TODO: INCLUDE SECTION TO CHECK THAT THE TIMES PROVIDED ARE WITHIN THE BOUNDS OF THE DATASET PROVIDED.
@@ -340,22 +349,71 @@ void readDataIn(char path_to_folder[255]) {
 }
 
 
-
+/// Straightforward name: given two time values as a double, we pass these values to a function and have it
+/// check all of the time values in the dataset. Function just counts the number of t-values in the range, sums them, then divides
+/// by the number that it counts.
 double meanT(double timestart, double timestop) {
+
     float sum = 0;
-    int count;
-    for(count = 0; count <  )
+    float count = 0;  /// Preemptively typing as float. Less efficient, but it saves us from forgetting to cast it as a float later.
+    int i;
+
+    for(i = 0; i < NUM_T_MEASUREMENTS; i++ ) {
+
+        if(BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+            sum += BT[i].temp;
+            count++;
+        }
+    }
+
+    return (sum / count);
+
 }
 
 
 
+/// Works the same as the above, but with a selector parameter that determines whether it calculates systolic or diastolic pressure means.
+/// When sys is nonzero, it calculates systolic. If it is zero, it calculates diastolic pressure mean.
 double meanBP(double timestart, double timestop, int sys) {
+    float sum = 0;
+    float count = 0;
+    int i;
+
+    for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
+
+        if(BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            if(sys) {
+                sum += BP[i].systolic;
+                count++;
+            } else {
+                sum += BP[i].diastolic;
+                count++;
+            }
+        }
+    }
+
+    return (sum / count);
+
 }
 
 
 
-
+/// Works more or less identically to meanT.
 double meanHR(double timestart, double timestop) {
+
+    float sum = 0;
+    float count = 0;
+    int i;
+
+    for(i = 0; i < NUM_HR_MEASUREMENTS; i++ ) {
+
+        if(HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+            sum += HR[i].rate;
+            count++;
+        }
+    }
+
+    return (sum / count);
 }
 
 
@@ -380,7 +438,7 @@ double minMaxT(double timestart, double timestop) {
 
 
 
-double minMaxBP(double timestart, double timestop) {
+double minMaxBP(double timestart, double timestop, int sys) {
 }
 
 
