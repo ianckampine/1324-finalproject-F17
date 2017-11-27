@@ -157,7 +157,7 @@ void main() {
                break;
 
 
-            /// Query the user for th
+            /// Query the user for the time and calculate health score.
             case 'c' :
                 /// First, check to see if the user has bothered to set the proper folder and read in data.
                 if(!folder_loc_set) {
@@ -172,8 +172,14 @@ void main() {
                     printf("Error. Time cannot be negative. \n");
                     time_for_score_set = 0;
                 }
-                /// INSERT CHECK FOR WHETHER THE SUPPLIED TIME VALUE IS WITHIN THE TIMES SPECIFIED BY THE FILE
-                /// ALSO INSERT THE HEALTH SCORE CALCULATION
+
+                if(time_for_score_set) {
+                    printf("Successfully set time for health score. Calculating health score... \n");
+                    /// INSERT HEALTH SCORE CALCULATION HERE
+                } else {
+                    printf("Failed to set time for calculating health score. Please rectify errors and retry. \n");
+                }
+
                 break;
 
 
@@ -183,7 +189,14 @@ void main() {
                 if(!folder_loc_set || !time_interval_set) {
                     printf("Error. Must specify the time interval for analysis and specify the location of the input sensor data before calculating statistics. \n");
                 } else {
-                    printf("STATISTICAL PARAMETERS FOR SPECIFIED INTERVAL:");
+                    printf("STATISTICAL PARAMETERS FOR SPECIFIED INTERVAL:\n");
+                    makeStatTable("BP", "mmHg", meanBP(time_start, time_stop, 1), sdBP(time_start, time_stop, 1), maxBP(time_start, time_stop, 1), minBP(time_start, time_stop, 1));
+                    printf("(SYSTOLIC MEASUREMENTS) \n"); /// Remember to communicate what KIND of blood pressure.
+                    makeStatTable("BP", "mmHg", meanBP(time_start, time_stop, 0), sdBP(time_start, time_stop, 0), maxBP(time_start, time_stop, 0), minBP(time_start, time_stop, 0));
+                    printf("(DIASTOLIC MEASUREMENTS)\n");
+                    makeStatTable("HR", " BPM", meanHR(time_start, time_stop), sdHR(time_start, time_stop), maxHR(time_start, time_stop), minHR(time_start, time_stop));
+                    makeStatTable("BT", "degF", meanT(time_start, time_stop), sdT(time_start, time_stop), maxT(time_start, time_stop), minT(time_start, time_stop));
+                    printf("\n");
                 }
                 break;
 
@@ -521,7 +534,7 @@ double minT(double timestart, double timestop) {
 
 
 
-/// Same as above, but as with all of the other BP calculations, it has a switch for systolic/diastolic pressure.
+/// Same as above, but as with all of the other BP calculations, it has a check for systolic/diastolic pressure.
 double minBP(double timestart, double timestop, int sys) {
 
     if(sys) {
@@ -662,7 +675,7 @@ void makeStatTable(char measurement_type[3], char units[5], double mean, double 
     printf("  Mean | %4.2f \n", roundedmean);
 
     /// Then stdev.
-    float roundedstdev = roundToHundredths(stdev)
+    float roundedstdev = roundToHundredths(stdev);
     printf("  STDV | %4.2f \n", roundedstdev);
 
     /// Then the max value.
@@ -686,11 +699,12 @@ void makeStatTable(char measurement_type[3], char units[5], double mean, double 
 float roundToHundredths(double number) {
     double intermed = number * 1000;
     int thousandths = ((int) intermed) % 10;
+    float rounded;
 
     if(thousandths >= 5) {
-        float rounded = ceil(number * 100) / 100;
+        rounded = ceil(number * 100) / 100;
     } else {
-        float rounded = floor(number * 100) / 100;
+        rounded = floor(number * 100) / 100;
     }
 
     return rounded;
