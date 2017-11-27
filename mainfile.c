@@ -14,8 +14,9 @@
 
 
 
-/// Function declarations.
+/// Function declarations, sorted in blocks by function (Input, Stats, Health Score, Output)
 void readDataIn(char path_to_folder[255]);
+
 double meanT(double timestart, double timestop);
 double meanBP(double timestart, double timestop, int sys);
 double meanHR(double timestart, double timestop);
@@ -28,6 +29,11 @@ double minHR(double timestart, double timestop);
 double maxT(double timestart, double timestop);
 double maxBP(double timestart, double timestop, int sys);
 double maxHR(double timestart, double timestop);
+
+
+void makeStatTable(char measurement_type[3], char units[5], double mean, double stdev, double max, double min);
+float roundToHundredths(double number);
+
 
 
 /// Struct declarations.
@@ -101,7 +107,7 @@ void main() {
         switch(option) {
 
 
-
+            /// Query user for path to folder.
             case 'a' :
                 printf("Please enter the location of the input files. Please use a relative path. \n");
                 scanf('%s', &path_to_folder);
@@ -111,7 +117,7 @@ void main() {
                 break;
 
 
-
+            /// Query the user for the time interval of interest.
             case 'b' :
                 /// First, make sure that the user has specified the location of the files. Some information from the files is needed for basic input validation.
                if(!folder_loc_set) {
@@ -140,8 +146,7 @@ void main() {
                }
                if(time_stop == time_start) {
                     printf("Error. Values may not be equal. This is not an interval. \n");
-                    time_interval_set = 0;double meanSysBP(double timestart, double timestop) {
-}
+                    time_interval_set = 0;
                }
 
                if(time_interval_set) {
@@ -152,7 +157,7 @@ void main() {
                break;
 
 
-
+            /// Query the user for th
             case 'c' :
                 /// First, check to see if the user has bothered to set the proper folder and read in data.
                 if(!folder_loc_set) {
@@ -168,6 +173,7 @@ void main() {
                     time_for_score_set = 0;
                 }
                 /// INSERT CHECK FOR WHETHER THE SUPPLIED TIME VALUE IS WITHIN THE TIMES SPECIFIED BY THE FILE
+                /// ALSO INSERT THE HEALTH SCORE CALCULATION
                 break;
 
 
@@ -177,7 +183,7 @@ void main() {
                 if(!folder_loc_set || !time_interval_set) {
                     printf("Error. Must specify the time interval for analysis and specify the location of the input sensor data before calculating statistics. \n");
                 } else {
-                    /// PERFORM THE CALCULATIONS ON STATISTICAL PARAMETERS
+                    printf("STATISTICAL PARAMETERS FOR SPECIFIED INTERVAL:");
                 }
                 break;
 
@@ -206,7 +212,7 @@ void main() {
 /// Definitions of functions. They appear in the order that they are used in main() above.
 
 
-
+/// Reads the data in from the folder specified by the user.
 void readDataIn(char path_to_folder[255]) {
 
 
@@ -247,8 +253,8 @@ void readDataIn(char path_to_folder[255]) {
                     }
                 }
                 //after the first file is complete, moves onto files 2 through 5
-                if (a!=1 && a<=5)
-                {
+            if (a!=1 && a<=5)
+               {
                     while (!feof(infile))
                     {
                         //post increment to continue the counting and make sure that it is sequential
@@ -349,6 +355,7 @@ void readDataIn(char path_to_folder[255]) {
 }
 
 
+
 /// Straightforward name: given two time values as a double, we pass these values to a function and have it
 /// check all of the time values in the dataset. Function just counts the number of t-values in the range, sums them, then divides
 /// by the number that it counts.
@@ -417,6 +424,7 @@ double meanHR(double timestart, double timestop) {
 }
 
 
+
 /// Calculates and returns the standard deviation of an interval within a temperature data set.
 /// Using the formula for corrected sample standard deviation.
 double sdT(double timestart, double timestop) {
@@ -438,6 +446,7 @@ double sdT(double timestart, double timestop) {
     return sqrt( sum_diff_squares / (count - 1) );
 
 }
+
 
 
 /// Works same way as above, but with a selector.
@@ -468,6 +477,7 @@ double sdBP(double timestart, double timestop, int sys) {
 }
 
 
+
 /// Largely the same as the body temp case.
 double sdHR(double timestart, double timestop) {
 
@@ -490,6 +500,7 @@ double sdHR(double timestart, double timestop) {
 }
 
 
+
 /// Finds minimum value in the temperature dataset. Starts by assuming that the first value is the lowest,
 /// and then proceeds under this assumption until it finds otherwise.
 double minT(double timestart, double timestop) {
@@ -507,6 +518,7 @@ double minT(double timestart, double timestop) {
     return workingValue;
 
 }
+
 
 
 /// Same as above, but as with all of the other BP calculations, it has a switch for systolic/diastolic pressure.
@@ -540,6 +552,7 @@ double minBP(double timestart, double timestop, int sys) {
 
 
 
+/// Same as above.
 double minHR(double timestart, double timestop) {
 
     double workingValue = HR[0].rate;
@@ -558,6 +571,7 @@ double minHR(double timestart, double timestop) {
 
 
 
+/// Just like minT, but with a single changed inequality.
 double maxT(double timestart, double timestop) {
 
     double workingValue = BT[0].temp;
@@ -576,6 +590,7 @@ double maxT(double timestart, double timestop) {
 
 
 
+/// Same as above, but for BP, so it has the same systolic parameter as usual.
 double maxBP(double timestart, double timestop, int sys) {
 
      if(sys) {
@@ -606,6 +621,7 @@ double maxBP(double timestart, double timestop, int sys) {
 
 
 
+/// Should be relatively clear.
 double maxHR(double timestart, double timestop) {
 
     double workingValue = HR[0].rate;
@@ -620,6 +636,64 @@ double maxHR(double timestart, double timestop) {
 
     return workingValue;
 
+}
+
+
+
+/// Helper function: Deals with creating small, formatted tables of statistical parameters.
+/// ASSUMPTION: All values rounded to two decimal places.
+void makeStatTable(char measurement_type[3], char units[5], double mean, double stdev, double max, double min) {
+
+    /// First, print table header.
+    printf("\n");
+    printf("  %s", measurement_type);
+    printf("  | (%s", units);
+    printf(") \n");
+
+    /// Now, a spacer.
+    printf("-------+----- \n");
+
+    /// Then another header and spacer.
+    printf(" Param | Val \n");
+    printf("-------+----- \n");
+
+    /// Then an entry for mean. Remembering to round.
+    float roundedmean = roundToHundredths(mean);
+    printf("  Mean | %4.2f \n", roundedmean);
+
+    /// Then stdev.
+    float roundedstdev = roundToHundredths(stdev)
+    printf("  STDV | %4.2f \n", roundedstdev);
+
+    /// Then the max value.
+    float roundedmax = roundToHundredths(max);
+    printf("   Max | %4.2f \n", roundedmax);
+
+    /// Then the min value.
+    float roundedmin = roundToHundredths(min);
+    printf("   Min | %4.2f \n", roundedmin);
+
+    /// Finally, close off the bottom of the table.
+    printf("-------+----- \n");
+
+
+}
+
+
+
+/// Helper function to round the statistical values to two decimal places. Calculations were performed as doubles to ensure accuracy
+/// while performing the operations. Need this function for final conversion to float.
+float roundToHundredths(double number) {
+    double intermed = number * 1000;
+    int thousandths = ((int) intermed) % 10;
+
+    if(thousandths >= 5) {
+        float rounded = ceil(number * 100) / 100;
+    } else {
+        float rounded = floor(number * 100) / 100;
+    }
+
+    return rounded;
 }
 
 
