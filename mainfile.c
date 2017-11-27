@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <math.h>
 
 
 #define NUM_HR_MEASUREMENTS 25
@@ -22,10 +22,12 @@ double meanHR(double timestart, double timestop);
 double sdT(double timestart, double timestop);
 double sdBP(double timestart, double timestop, int sys);
 double sdHR(double timestart, double timestop);
-double minMaxT(double timestart, double timestop);
-double minMaxBP(double timestart, double timestop, int sys);
-double minMaxHR(double timestart, double timestop);
-
+double minT(double timestart, double timestop);
+double minBP(double timestart, double timestop, int sys);
+double minHR(double timestart, double timestop);
+double maxT(double timestart, double timestop);
+double maxBP(double timestart, double timestop, int sys);
+double maxHR(double timestart, double timestop);
 
 
 /// Struct declarations.
@@ -359,7 +361,7 @@ double meanT(double timestart, double timestop) {
     int i;
 
     for(i = 0; i < NUM_T_MEASUREMENTS; i++ ) {
-
+        /// Check if each t-value is within the specified window.
         if(BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             sum += BT[i].temp;
             count++;
@@ -406,7 +408,6 @@ double meanHR(double timestart, double timestop) {
     int i;
 
     for(i = 0; i < NUM_HR_MEASUREMENTS; i++ ) {
-
         if(HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
             sum += HR[i].rate;
             count++;
@@ -414,36 +415,110 @@ double meanHR(double timestart, double timestop) {
     }
 
     return (sum / count);
+
 }
 
 
-
+/// Calculates and returns the standard deviation of an interval within a temperature data set.
+/// Using the formula for corrected sample standard deviation.
 double sdT(double timestart, double timestop) {
+
+    double mean = meanT(timestart, timestop);
+    double diff_sq = 0;
+    float sum_diff_squares = 0;
+    float count = 0;
+    int i;
+
+    for(i = 0; i < NUM_T_MEASUREMENTS; i++) {
+        if(BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+            diff_sq = (mean - BT[i].temp) * (mean - BT[i].temp);
+            sum_diff_squares += diff_sq;
+            count++;
+        }
+    }
+
+    return sqrt( sum_diff_squares / (count - 1) );
+
 }
 
 
-
+/// Works same way as above, but with a selector.
 double sdBP(double timestart, double timestop, int sys) {
+
+    double mean = meanBP(timestart, timestop, sys);
+    double diff_sq = 0;
+    float sum_diff_squares = 0;
+    float count = 0;
+    int i;
+
+    for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
+        if(BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+
+            /// Just add another selector for the blood pressure type.
+            if(sys) {
+                diff_sq = (mean - BP[i].systolic) * (mean - BP[i].systolic);
+            } else {
+                diff_sq = (mean - BP[i].diastolic) * (mean - BP[i].diastolic);
+            }
+            sum_diff_squares += diff_sq;
+            count++;
+        }
+    }
+
+    return sqrt( sum_diff_squares / (count - 1));
+
 }
 
 
-
+/// Largely the same as the body temp case.
 double sdHR(double timestart, double timestop) {
+
+    double mean = meanHR(timestart, timestop);
+    double diff_sq = 0;
+    float sum_diff_squares = 0;
+    float count = 0;
+    int i;
+
+    for(i = 0; i < NUM_HR_MEASUREMENTS; i++) {
+        if(HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+            diff_sq = (mean - HR[i].rate) * (mean - HR[i].rate);
+            sum_diff_squares += diff_sq;
+            count++;
+        }
+    }
+
+    return sqrt( sum_diff_squares / (count - 1) );
+
 }
 
 
 
-double minMaxT(double timestart, double timestop) {
+double minT(double timestart, double timestop) {
 }
 
 
 
-double minMaxBP(double timestart, double timestop, int sys) {
+double minBP(double timestart, double timestop, int sys) {
 }
 
 
 
-double minMaxHR(double timestart, double timestop) {
+double minHR(double timestart, double timestop) {
+}
+
+
+
+double maxT(double timestart, double timestop) {
+}
+
+
+
+double maxBP(double timestart, double timestop, int sys) {
+}
+
+
+
+double maxHR(double timestart, double timestop) {
 }
 
 
