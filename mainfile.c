@@ -144,8 +144,6 @@ void main() {
 }
                }
 
-               /// TODO: INCLUDE SECTION TO CHECK THAT THE TIMES PROVIDED ARE WITHIN THE BOUNDS OF THE DATASET PROVIDED.
-
                if(time_interval_set) {
                     printf("Time interval set successfully! \n");
                } else {
@@ -492,33 +490,136 @@ double sdHR(double timestart, double timestop) {
 }
 
 
-
+/// Finds minimum value in the temperature dataset. Starts by assuming that the first value is the lowest,
+/// and then proceeds under this assumption until it finds otherwise.
 double minT(double timestart, double timestop) {
+
+    double workingValue = BT[0].temp;
+    int i;
+
+    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+
+        if(BT[i].temp < workingValue) {
+            workingValue = BT[i].temp;
+        }
+    }
+
+    return workingValue;
+
 }
 
 
-
+/// Same as above, but as with all of the other BP calculations, it has a switch for systolic/diastolic pressure.
 double minBP(double timestart, double timestop, int sys) {
+
+    if(sys) {
+
+        double workingValue = BP[0].systolic;
+        int i;
+
+        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+
+            if(BP[i].systolic < workingValue) {
+                workingValue = BP[i].systolic;
+            }
+        }
+
+    } else {
+
+        double workingValue = BP[0].diastolic;
+        int i;
+
+        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+
+            if(BP[i].diastolic < workingValue) {
+                workingValue = BP[i].diastolic;
+            }
+        }
+    }
 }
 
 
 
 double minHR(double timestart, double timestop) {
+
+    double workingValue = HR[0].rate;
+    int i;
+
+    for(i = 1; i < NUM_HR_MEASUREMENTS; i++) {
+
+        if(HR[i].rate < workingValue) {
+            workingValue = HR[i].rate;
+        }
+    }
+
+    return workingValue;
+
 }
 
 
 
 double maxT(double timestart, double timestop) {
+
+    double workingValue = BT[0].temp;
+    int i;
+
+    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+
+        if(BT[i].temp > workingValue) {
+            workingValue = BT[i].temp;
+        }
+    }
+
+    return workingValue;
+
 }
 
 
 
 double maxBP(double timestart, double timestop, int sys) {
+
+     if(sys) {
+
+        double workingValue = BP[0].systolic;
+        int i;
+
+        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+
+            if(BP[i].systolic > workingValue) {
+                workingValue = BP[i].systolic;
+            }
+        }
+
+    } else {
+
+        double workingValue = BP[0].diastolic;
+        int i;
+
+        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+
+            if(BP[i].diastolic > workingValue) {
+                workingValue = BP[i].diastolic;
+            }
+        }
+    }
 }
 
 
 
 double maxHR(double timestart, double timestop) {
+
+    double workingValue = HR[0].rate;
+    int i;
+
+    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+
+        if(HR[i].rate > workingValue) {
+            workingValue = BT[i].temp;
+        }
+    }
+
+    return workingValue;
+
 }
 
 
