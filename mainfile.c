@@ -1,5 +1,5 @@
 /// Written by Ian Kampine and Fahir Nasir using CodeBlocks 16.01
-/// Main menu/execution control.
+
 
 
 #include <stdio.h>
@@ -15,7 +15,7 @@
 
 
 /// Function declarations, sorted in blocks by function (Input, Stats, Health Score, Output)
-void readDataIn(char path_to_folder[255]);
+void readDataIn(char filename[255]);
 
 double meanT(double timestart, double timestop);
 double meanBP(double timestart, double timestop, int sys);
@@ -32,7 +32,7 @@ double maxHR(double timestart, double timestop);
 
 
 void makeStatTable(char measurement_type[3], char units[5], double mean, double stdev, double max, double min);
-float roundToHundredths(double number);
+double roundToHundredths(double number);
 
 
 
@@ -48,7 +48,7 @@ struct body_temperature
 {
     double timestamp;
     double temp;
-    char mW[2];
+    char mW[3];
 };
 
 struct heart_rate
@@ -84,14 +84,12 @@ void main() {
     double time_start;
     double time_stop;
     double time_for_score;
-    char path_to_folder[255];
+    char filename[255];
     char option;
-
 
 
     /// Main menu loop/main logic loop.
     while(running) {
-
 
         /// Most functionality here should be pretty clear. Running is the variable used to ensure that the whole program continues looping
         /// until the user tells it to exit. Each input step also performs preliminary input validation.
@@ -101,7 +99,7 @@ void main() {
         printf("c) Get health score for single time. \n");
         printf("d) Get statistical values for time intervals. \n");
         printf("e) Exit program. \n");
-        scanf('%c', &option);
+        scanf(" %c", &option);
 
 
         switch(option) {
@@ -110,10 +108,10 @@ void main() {
             /// Query user for path to folder.
             case 'a' :
                 printf("Please enter the location of the input files. Please use a relative path. \n");
-                scanf('%s', &path_to_folder);
-                readDataIn(path_to_folder);
+                scanf("%s", filename);
+                readDataIn(filename);
                 folder_loc_set = 1;
-                printf("Folder location set to %s \n", path_to_folder);
+                printf("Folder location set to %s \n", filename);
                 break;
 
 
@@ -125,9 +123,9 @@ void main() {
                } else {
                     printf("This program will automatically handle any stop time values exceeding the size of the dataset. \n");
                     printf("Please enter the start time (in seconds) for the desired time interval. \n");
-                    scanf('%f', &time_start);
+                    scanf(" %lf", &time_start);
                     printf("Please enter the stop time (in seconds) for the desired time interval. \n");
-                    scanf('%f', &time_stop);
+                    scanf(" %lf", &time_stop);
                     time_interval_set = 1;
                }
 
@@ -164,7 +162,7 @@ void main() {
                     printf("Error. Please set the folder that contains the data to analyze before beginning analysis. \n");
                 } else {
                     printf("Please enter the time you would like to calculate the health score at. \n");
-                    scanf("%f", &time_for_score);
+                    scanf(" %lf", &time_for_score);
                     time_for_score_set = 1;
                 }
                 /// Basic input validation for this case.
@@ -194,7 +192,7 @@ void main() {
                     printf("(SYSTOLIC MEASUREMENTS) \n"); /// Remember to communicate what KIND of blood pressure.
                     makeStatTable("BP", "mmHg", meanBP(time_start, time_stop, 0), sdBP(time_start, time_stop, 0), maxBP(time_start, time_stop, 0), minBP(time_start, time_stop, 0));
                     printf("(DIASTOLIC MEASUREMENTS)\n");
-                    makeStatTable("HR", " BPM", meanHR(time_start, time_stop), sdHR(time_start, time_stop), maxHR(time_start, time_stop), minHR(time_start, time_stop));
+                    makeStatTable("HR", "BPM", meanHR(time_start, time_stop), sdHR(time_start, time_stop), maxHR(time_start, time_stop), minHR(time_start, time_stop));
                     makeStatTable("BT", "degF", meanT(time_start, time_stop), sdT(time_start, time_stop), maxT(time_start, time_stop), minT(time_start, time_stop));
                     printf("\n");
                 }
@@ -226,14 +224,10 @@ void main() {
 
 
 /// Reads the data in from the folder specified by the user.
-void readDataIn(char path_to_folder[255]) {
+void readDataIn(char filename[255]) {
 
 
-    char filename[255];
     FILE *infile;
-
-    /// Added this to simplify interfacing your function with the main program loop.
-    strcpy(path_to_folder, filename);
 
     //Blood Pressure Files
     int a;
@@ -374,8 +368,8 @@ void readDataIn(char path_to_folder[255]) {
 /// by the number that it counts.
 double meanT(double timestart, double timestop) {
 
-    float sum = 0;
-    float count = 0;  /// Preemptively typing as float. Less efficient, but it saves us from forgetting to cast it as a float later.
+    double sum = 0;
+    double count = 0;  /// Preemptively typing as double. Less efficient, but it saves us from forgetting to cast it as a double later.
     int i;
 
     for(i = 0; i < NUM_T_MEASUREMENTS; i++ ) {
@@ -386,7 +380,13 @@ double meanT(double timestart, double timestop) {
         }
     }
 
-    return (sum / count);
+    /// Stops a potential division by zero error if no data values are within the range.
+    if(count == 0) {
+        return 0;
+    } else {
+        return (sum / count);
+
+    }
 
 }
 
@@ -395,8 +395,8 @@ double meanT(double timestart, double timestop) {
 /// Works the same as the above, but with a selector parameter that determines whether it calculates systolic or diastolic pressure means.
 /// When sys is nonzero, it calculates systolic. If it is zero, it calculates diastolic pressure mean.
 double meanBP(double timestart, double timestop, int sys) {
-    float sum = 0;
-    float count = 0;
+    double sum = 0;
+    double count = 0;
     int i;
 
     for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
@@ -412,8 +412,13 @@ double meanBP(double timestart, double timestop, int sys) {
         }
     }
 
-    return (sum / count);
+    /// Stops a potential division by zero error if no values are within the interval specified.
+    if(count == 0) {
+        return 0;
+    } else {
+        return (sum / count);
 
+    }
 }
 
 
@@ -421,8 +426,8 @@ double meanBP(double timestart, double timestop, int sys) {
 /// Works more or less identically to meanT.
 double meanHR(double timestart, double timestop) {
 
-    float sum = 0;
-    float count = 0;
+    double sum = 0;
+    double count = 0;
     int i;
 
     for(i = 0; i < NUM_HR_MEASUREMENTS; i++ ) {
@@ -432,7 +437,13 @@ double meanHR(double timestart, double timestop) {
         }
     }
 
-    return (sum / count);
+    /// To stop a possible division by zero error if there are no data values within the range selected.
+    if(count == 0) {
+        return 0;
+    } else {
+        return (sum / count);
+
+    }
 
 }
 
@@ -444,8 +455,8 @@ double sdT(double timestart, double timestop) {
 
     double mean = meanT(timestart, timestop);
     double diff_sq = 0;
-    float sum_diff_squares = 0;
-    float count = 0;
+    double sum_diff_squares = 0;
+    double count = 0;
     int i;
 
     for(i = 0; i < NUM_T_MEASUREMENTS; i++) {
@@ -467,8 +478,8 @@ double sdBP(double timestart, double timestop, int sys) {
 
     double mean = meanBP(timestart, timestop, sys);
     double diff_sq = 0;
-    float sum_diff_squares = 0;
-    float count = 0;
+    double sum_diff_squares = 0;
+    double count = 0;
     int i;
 
     for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
@@ -496,8 +507,8 @@ double sdHR(double timestart, double timestop) {
 
     double mean = meanHR(timestart, timestop);
     double diff_sq = 0;
-    float sum_diff_squares = 0;
-    float count = 0;
+    double sum_diff_squares = 0;
+    double count = 0;
     int i;
 
     for(i = 0; i < NUM_HR_MEASUREMENTS; i++) {
@@ -523,7 +534,7 @@ double minT(double timestart, double timestop) {
 
     for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
 
-        if(BT[i].temp < workingValue) {
+        if(BT[i].temp < workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
         }
     }
@@ -544,10 +555,12 @@ double minBP(double timestart, double timestop, int sys) {
 
         for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
 
-            if(BP[i].systolic < workingValue) {
+            if(BP[i].systolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
             }
         }
+
+        return workingValue;
 
     } else {
 
@@ -556,10 +569,12 @@ double minBP(double timestart, double timestop, int sys) {
 
         for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
 
-            if(BP[i].diastolic < workingValue) {
+            if(BP[i].diastolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].diastolic;
             }
         }
+
+        return workingValue;
     }
 }
 
@@ -573,7 +588,7 @@ double minHR(double timestart, double timestop) {
 
     for(i = 1; i < NUM_HR_MEASUREMENTS; i++) {
 
-        if(HR[i].rate < workingValue) {
+        if(HR[i].rate < workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
             workingValue = HR[i].rate;
         }
     }
@@ -592,7 +607,7 @@ double maxT(double timestart, double timestop) {
 
     for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
 
-        if(BT[i].temp > workingValue) {
+        if(BT[i].temp > workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
         }
     }
@@ -613,10 +628,12 @@ double maxBP(double timestart, double timestop, int sys) {
 
         for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
 
-            if(BP[i].systolic > workingValue) {
+            if(BP[i].systolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
             }
         }
+
+        return workingValue;
 
     } else {
 
@@ -629,6 +646,9 @@ double maxBP(double timestart, double timestop, int sys) {
                 workingValue = BP[i].diastolic;
             }
         }
+
+        return workingValue;
+
     }
 }
 
@@ -642,8 +662,8 @@ double maxHR(double timestart, double timestop) {
 
     for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
 
-        if(HR[i].rate > workingValue) {
-            workingValue = BT[i].temp;
+        if(HR[i].rate > workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+            workingValue = HR[i].rate;
         }
     }
 
@@ -659,7 +679,7 @@ void makeStatTable(char measurement_type[3], char units[5], double mean, double 
 
     /// First, print table header.
     printf("\n");
-    printf("  %s", measurement_type);
+    printf("  %s ", measurement_type);
     printf("  | (%s", units);
     printf(") \n");
 
@@ -671,20 +691,20 @@ void makeStatTable(char measurement_type[3], char units[5], double mean, double 
     printf("-------+----- \n");
 
     /// Then an entry for mean. Remembering to round.
-    float roundedmean = roundToHundredths(mean);
-    printf("  Mean | %4.2f \n", roundedmean);
+    double roundedmean = roundToHundredths(mean);
+    printf("  Mean | %4.2lf \n", roundedmean);
 
     /// Then stdev.
-    float roundedstdev = roundToHundredths(stdev);
-    printf("  STDV | %4.2f \n", roundedstdev);
+    double roundedstdev = roundToHundredths(stdev);
+    printf("  STDV | %4.2lf \n", roundedstdev);
 
     /// Then the max value.
-    float roundedmax = roundToHundredths(max);
-    printf("   Max | %4.2f \n", roundedmax);
+    double roundedmax = roundToHundredths(max);
+    printf("   Max | %4.2lf \n", roundedmax);
 
     /// Then the min value.
-    float roundedmin = roundToHundredths(min);
-    printf("   Min | %4.2f \n", roundedmin);
+    double roundedmin = roundToHundredths(min);
+    printf("   Min | %4.2lf \n", roundedmin);
 
     /// Finally, close off the bottom of the table.
     printf("-------+----- \n");
@@ -695,11 +715,11 @@ void makeStatTable(char measurement_type[3], char units[5], double mean, double 
 
 
 /// Helper function to round the statistical values to two decimal places. Calculations were performed as doubles to ensure accuracy
-/// while performing the operations. Need this function for final conversion to float.
-float roundToHundredths(double number) {
+/// while performing the operations.
+double roundToHundredths(double number) {
     double intermed = number * 1000;
     int thousandths = ((int) intermed) % 10;
-    float rounded;
+    double rounded;
 
     if(thousandths >= 5) {
         rounded = ceil(number * 100) / 100;
