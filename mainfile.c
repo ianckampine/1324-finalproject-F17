@@ -525,17 +525,24 @@ double sdHR(double timestart, double timestop) {
 
 
 
-/// Finds minimum value in the temperature dataset. Starts by assuming that the first value is the lowest,
-/// and then proceeds under this assumption until it finds otherwise.
+/// Finds minimum value in the temperature dataset. Starts by finding the first occurring value in the dataset.
+/// Then, it assumes that the first value is the lowest.
+/// Finally, it proceeds and checks this assumption until it finds otherwise.
 double minT(double timestart, double timestop) {
 
-    double workingValue = BT[0].temp;
+    double workingValue;
     int i;
+    int foundValue = 0;
 
-    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+    for(i = 0; i < NUM_T_MEASUREMENTS; i++) {
 
-        if(BT[i].temp < workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+        if(!foundValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
+            foundValue = 1;
+
+        } else if(BT[i].temp < workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+            workingValue = BT[i].temp;
+
         }
     }
 
@@ -548,15 +555,21 @@ double minT(double timestart, double timestop) {
 /// Same as above, but as with all of the other BP calculations, it has a check for systolic/diastolic pressure.
 double minBP(double timestart, double timestop, int sys) {
 
-    if(sys) {
+    double workingValue;
+    int i;
+    int foundValue = 0;
 
-        double workingValue = BP[0].systolic;
-        int i;
+    if (sys) {
 
-        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+        for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
 
-            if(BP[i].systolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            if(!foundValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
+                foundValue = 1;
+
+            } else if(BP[i].systolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+                workingValue = BP[i].systolic;
+
             }
         }
 
@@ -564,32 +577,42 @@ double minBP(double timestart, double timestop, int sys) {
 
     } else {
 
-        double workingValue = BP[0].diastolic;
-        int i;
+        for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
 
-        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
-
-            if(BP[i].diastolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            if(!foundValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].diastolic;
+                foundValue = 1;
+
+            } else if(BP[i].diastolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+                workingValue = BP[i].diastolic;
+
             }
         }
 
         return workingValue;
+
     }
-}
+
+   }
 
 
 
 /// Same as above.
 double minHR(double timestart, double timestop) {
 
-    double workingValue = HR[0].rate;
+    double workingValue;
     int i;
+    int foundValue = 0;
 
-    for(i = 1; i < NUM_HR_MEASUREMENTS; i++) {
+    for(i = 0; i < NUM_HR_MEASUREMENTS; i++) {
 
-        if(HR[i].rate < workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+        if(!foundValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
             workingValue = HR[i].rate;
+            foundValue = 1;
+
+        } else if(HR[i].rate < workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+            workingValue = HR[i].rate;
+
         }
     }
 
@@ -602,13 +625,19 @@ double minHR(double timestart, double timestop) {
 /// Just like minT, but with a single changed inequality.
 double maxT(double timestart, double timestop) {
 
-    double workingValue = BT[0].temp;
+    double workingValue;
     int i;
+    int foundValue = 0;
 
-    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+    for(i = 0; i < NUM_T_MEASUREMENTS; i++) {
 
-        if(BT[i].temp > workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+        if(!foundValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
+            foundValue = 1;
+
+        } else if(BT[i].temp > workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+            workingValue = BT[i].temp;
+
         }
     }
 
@@ -621,15 +650,21 @@ double maxT(double timestart, double timestop) {
 /// Same as above, but for BP, so it has the same systolic parameter as usual.
 double maxBP(double timestart, double timestop, int sys) {
 
-     if(sys) {
+    double workingValue;
+    int i;
+    int foundValue = 0;
 
-        double workingValue = BP[0].systolic;
-        int i;
+    if (sys) {
 
-        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
+        for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
 
-            if(BP[i].systolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            if(!foundValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
+                foundValue = 1;
+
+            } else if(BP[i].systolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+                workingValue = BP[i].systolic;
+
             }
         }
 
@@ -637,19 +672,22 @@ double maxBP(double timestart, double timestop, int sys) {
 
     } else {
 
-        double workingValue = BP[0].diastolic;
-        int i;
+        for(i = 0; i < NUM_BP_MEASUREMENTS; i++) {
 
-        for(i = 1; i < NUM_BP_MEASUREMENTS; i++) {
-
-            if(BP[i].diastolic > workingValue) {
+            if(!foundValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].diastolic;
+                foundValue = 1;
+
+            } else if(BP[i].diastolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+                workingValue = BP[i].diastolic;
+
             }
         }
 
         return workingValue;
 
     }
+
 }
 
 
@@ -657,13 +695,19 @@ double maxBP(double timestart, double timestop, int sys) {
 /// Should be relatively clear.
 double maxHR(double timestart, double timestop) {
 
-    double workingValue = HR[0].rate;
+    double workingValue;
     int i;
+    int foundValue = 0;
 
-    for(i = 1; i < NUM_T_MEASUREMENTS; i++) {
+    for(i = 0; i < NUM_HR_MEASUREMENTS; i++) {
 
-        if(HR[i].rate > workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+        if(!foundValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
             workingValue = HR[i].rate;
+            foundValue = 1;
+
+        } else if(HR[i].rate > workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+            workingValue = HR[i].rate;
+
         }
     }
 
