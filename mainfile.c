@@ -14,7 +14,7 @@
 
 
 
-/// Function declarations, sorted in blocks by function (Input, Stats, Health Score, Output)
+/// Function declarations, sorted in blocks by function (Input, Health Scores, Statistics, Output)
 void readDataIn(char filename[255]);
 
 double meanT(double timestart, double timestop);
@@ -93,7 +93,7 @@ void main() {
 
         /// Most functionality here should be pretty clear. Running is the variable used to ensure that the whole program continues looping
         /// until the user tells it to exit. Each input step also performs preliminary input validation.
-        printf("Please select one of the following options: (case-sensitive) \n");
+        printf("Please select one of the following options:  \n");
         printf("a) Set input folder location. \n");
         printf("b) Set time interval for calculations. \n");
         printf("c) Get health score for single time. \n");
@@ -105,18 +105,20 @@ void main() {
         switch(option) {
 
 
-            /// Query user for path to folder.
+            /// Query user for path to folder. Note use of doubled cases to make it case-insensitive.
             case 'a' :
+            case 'A' :
                 printf("Please enter the location of the input files. Please use a relative path. \n");
                 scanf("%s", filename);
                 readDataIn(filename);
+                printf("Setting path to %s", filename);
                 folder_loc_set = 1;
-                printf("Folder location set to %s \n", filename);
                 break;
 
 
             /// Query the user for the time interval of interest.
             case 'b' :
+            case 'B' :
                 /// First, make sure that the user has specified the location of the files. Some information from the files is needed for basic input validation.
                if(!folder_loc_set) {
                     printf("Please set the path to the folder before setting a time period for calculations. Use option a) in the previous menu. \n");
@@ -157,6 +159,7 @@ void main() {
 
             /// Query the user for the time and calculate health score.
             case 'c' :
+            case 'C' :
                 /// First, check to see if the user has bothered to set the proper folder and read in data.
                 if(!folder_loc_set) {
                     printf("Error. Please set the folder that contains the data to analyze before beginning analysis. \n");
@@ -183,6 +186,7 @@ void main() {
 
 
             case 'd' :
+            case 'D' :
                 /// Need data to be loaded and also need to know the time interval to calculate the desired statistics.
                 if(!folder_loc_set || !time_interval_set) {
                     printf("Error. Must specify the time interval for analysis and specify the location of the input sensor data before calculating statistics. \n");
@@ -201,6 +205,7 @@ void main() {
 
 
             case 'e' :
+            case 'E' :
                 printf("Exiting program. \n");
                 running = 0;
                 break;
@@ -530,7 +535,7 @@ double sdHR(double timestart, double timestop) {
 /// Finally, it proceeds and checks this assumption until it finds otherwise.
 double minT(double timestart, double timestop) {
 
-    double workingValue;
+    double workingValue = 0;
     int i;
     int foundValue = 0;
 
@@ -540,7 +545,7 @@ double minT(double timestart, double timestop) {
             workingValue = BT[i].temp;
             foundValue = 1;
 
-        } else if(BT[i].temp < workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+        } else if(foundValue && BT[i].temp < workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
 
         }
@@ -555,7 +560,7 @@ double minT(double timestart, double timestop) {
 /// Same as above, but as with all of the other BP calculations, it has a check for systolic/diastolic pressure.
 double minBP(double timestart, double timestop, int sys) {
 
-    double workingValue;
+    double workingValue = 0;
     int i;
     int foundValue = 0;
 
@@ -567,7 +572,7 @@ double minBP(double timestart, double timestop, int sys) {
                 workingValue = BP[i].systolic;
                 foundValue = 1;
 
-            } else if(BP[i].systolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            } else if(foundValue && BP[i].systolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
 
             }
@@ -583,7 +588,7 @@ double minBP(double timestart, double timestop, int sys) {
                 workingValue = BP[i].diastolic;
                 foundValue = 1;
 
-            } else if(BP[i].diastolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            } else if(foundValue && BP[i].diastolic < workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].diastolic;
 
             }
@@ -600,17 +605,17 @@ double minBP(double timestart, double timestop, int sys) {
 /// Same as above.
 double minHR(double timestart, double timestop) {
 
-    double workingValue;
+    double workingValue = 0;
     int i;
     int foundValue = 0;
 
     for(i = 0; i < NUM_HR_MEASUREMENTS; i++) {
 
-        if(!foundValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+        if((!foundValue) && (HR[i].timestamp < timestop) && (HR[i].timestamp > timestart)) {
             workingValue = HR[i].rate;
             foundValue = 1;
 
-        } else if(HR[i].rate < workingValue && HR[i].timestamp < timestop && HR[i].timestamp > timestart) {
+        } else if(foundValue && (HR[i].rate < workingValue) && (HR[i].timestamp < timestop) && (HR[i].timestamp > timestart)) {
             workingValue = HR[i].rate;
 
         }
@@ -625,7 +630,7 @@ double minHR(double timestart, double timestop) {
 /// Just like minT, but with a single changed inequality.
 double maxT(double timestart, double timestop) {
 
-    double workingValue;
+    double workingValue = 0;
     int i;
     int foundValue = 0;
 
@@ -635,7 +640,7 @@ double maxT(double timestart, double timestop) {
             workingValue = BT[i].temp;
             foundValue = 1;
 
-        } else if(BT[i].temp > workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
+        } else if(foundValue && BT[i].temp > workingValue && BT[i].timestamp < timestop && BT[i].timestamp > timestart) {
             workingValue = BT[i].temp;
 
         }
@@ -650,7 +655,7 @@ double maxT(double timestart, double timestop) {
 /// Same as above, but for BP, so it has the same systolic parameter as usual.
 double maxBP(double timestart, double timestop, int sys) {
 
-    double workingValue;
+    double workingValue = 0;
     int i;
     int foundValue = 0;
 
@@ -662,7 +667,7 @@ double maxBP(double timestart, double timestop, int sys) {
                 workingValue = BP[i].systolic;
                 foundValue = 1;
 
-            } else if(BP[i].systolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            } else if(foundValue && BP[i].systolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].systolic;
 
             }
@@ -678,7 +683,7 @@ double maxBP(double timestart, double timestop, int sys) {
                 workingValue = BP[i].diastolic;
                 foundValue = 1;
 
-            } else if(BP[i].diastolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
+            } else if(foundValue && BP[i].diastolic > workingValue && BP[i].timestamp < timestop && BP[i].timestamp > timestart) {
                 workingValue = BP[i].diastolic;
 
             }
@@ -718,7 +723,7 @@ double maxHR(double timestart, double timestop) {
 
 
 /// Helper function: Deals with creating small, formatted tables of statistical parameters.
-/// ASSUMPTION: All values rounded to two decimal places.
+/// All values will be rounded to two decimal places.
 void makeStatTable(char measurement_type[3], char units[5], double mean, double stdev, double max, double min) {
 
     /// First, print table header.
