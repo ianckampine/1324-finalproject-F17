@@ -11,11 +11,18 @@
 #define NUM_HR_MEASUREMENTS 25
 #define NUM_BP_MEASUREMENTS 45
 #define NUM_T_MEASUREMENTS 43
+#define TIME_MIN 4
+#define TIME_MAX 94
 
 
 
 /// Function declarations, sorted in blocks by function (Input, Health Scores, Statistics, Output)
 void readDataIn(char filename[255]);
+
+void arrangeBPs();
+void arrangeHRs();
+void arrangeBTs();
+
 
 double meanT(double timestart, double timestop);
 double meanBP(double timestart, double timestop, int sys);
@@ -69,14 +76,14 @@ struct heart_rate HR[NUM_HR_MEASUREMENTS];
 
 
 
-/// Handles all user input and output. This is effectively the main menu function.
+
 void main() {
 
 
 
     /// Declare a few arrays of data from the struct to hold everything.
-    /// Setting up basic variables for flow control
-    /// as well as critical parameters.
+    /// Setting up basic variables for flow control, input validation,
+    /// as well as other critical parameters.
     int running = 1;
     int folder_loc_set = 0;
     int time_interval_set = 0;
@@ -160,6 +167,7 @@ void main() {
             /// Query the user for the time and calculate health score.
             case 'c' :
             case 'C' :
+
                 /// First, check to see if the user has bothered to set the proper folder and read in data.
                 if(!folder_loc_set) {
                     printf("Error. Please set the folder that contains the data to analyze before beginning analysis. \n");
@@ -168,15 +176,25 @@ void main() {
                     scanf(" %lf", &time_for_score);
                     time_for_score_set = 1;
                 }
+
                 /// Basic input validation for this case.
-                if(time_for_score < 0) {
-                    printf("Error. Time cannot be negative. \n");
+                if(time_for_score < TIME_MIN || time_for_score > TIME_MAX) {
+                    printf("Error. You have chosen a time outside of the time range for the data set.");
                     time_for_score_set = 0;
                 }
 
+                /// Perform some setup operations, then calculate the health score.
                 if(time_for_score_set) {
+
                     printf("Successfully set time for health score. Calculating health score... \n");
-                    /// INSERT HEALTH SCORE CALCULATION HERE
+
+                    /// Order all data sets in ascending order.
+                    arrangeBPs();
+                    arrangeBTs();
+                    arrangeHRs();
+
+
+
                 } else {
                     printf("Failed to set time for calculating health score. Please rectify errors and retry. \n");
                 }
@@ -719,6 +737,94 @@ double maxHR(double timestart, double timestop) {
     return workingValue;
 
 }
+
+
+/// Orders the BP array by increasing timestamps.
+void arrangeBPs() {
+
+    int g;
+    int h;
+    /// Placeholder variables for parameters being swapped.
+    double temp1;
+    double temp2;
+    double temp3;
+
+    for (g = 0; g < NUM_BP_MEASUREMENTS; g++)
+        {
+            for (h = g + 1; h < NUM_BP_MEASUREMENTS; h++)
+                {
+                    if (BP[g].timestamp > BP[h].timestamp)
+                        {
+                            ///if a timestamp is larger, push the variable in higher order and swap the related variables tied to the order value
+                            temp1 = BP[g].timestamp;
+                            BP[g].timestamp = BP[h].timestamp;
+                            BP[h].timestamp = temp1;
+
+                            temp2 = BP[g].diastolic;
+                            BP[g].diastolic = BP[h].diastolic;
+                            BP[h].diastolic = temp2;
+
+                            temp3 = BP[g].systolic;
+                            BP[g].systolic = BP[h].systolic;
+                            BP[h].systolic = temp3;
+                        }
+                }
+        }
+}
+
+
+
+/// Functions exactly like arrangeBPs(), but works on BTs.
+void arrangeBTs() {
+
+    double temp1, temp2;
+    int w, e;
+
+    for (w = 0; w < NUM_T_MEASUREMENTS; w++)
+        {
+            for (e = w + 1; e < NUM_T_MEASUREMENTS; e++)
+                {
+                    if (BT[w].timestamp > BT[e].timestamp)
+                        {
+                            temp1 = BT[w].timestamp;
+                            BT[w].timestamp = BT[e].timestamp;
+                            BT[e].timestamp = temp1;
+
+                            temp2 = BT[w].temp;
+                            BT[w].temp = BT[e].temp;
+                            BT[e].temp = temp2;
+                        }
+                }
+        }
+}
+
+
+
+
+/// Functions exactly like previous arrangement functions, but for HRs.
+void arrangeHRs() {
+
+    int w, e;
+    double temp6, temp7;
+
+    for (w = 0; w < NUM_HR_MEASUREMENTS; w++)
+            {
+                for (e = w + 1; e < NUM_HR_MEASUREMENTS; e++)
+                    {
+                        if (HR[w].timestamp > HR[e].timestamp)
+                        {
+                            temp6 = HR[w].timestamp;
+                            HR[w].timestamp = HR[e].timestamp;
+                            HR[e].timestamp = temp6;
+
+                            temp7 = HR[w].rate;
+                            HR[w].rate = HR[e].rate;
+                            HR[e].rate = temp7;
+                        }
+                    }
+            }
+    }
+
 
 
 
