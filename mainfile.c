@@ -19,9 +19,19 @@
 /// Function declarations, sorted in blocks by function (Input, Health Scores, Statistics, Output)
 void readDataIn(char filename[255]);
 
+
 void arrangeBPs();
 void arrangeHRs();
 void arrangeBTs();
+double findBP_Dia(double time);
+double findBP_Sys(double time);
+double findBT(double time);
+double findHR(double time);
+void reportState_HR(double heartrate);
+void reportState_BP(double bloodpressure, int sys);
+void reportState_BT(double temperature);
+void calcHealthScore(double BP_sys, double BP_dia, double heartrate, double temperature);
+
 
 
 double meanT(double timestart, double timestop);
@@ -193,6 +203,11 @@ void main() {
                     arrangeBTs();
                     arrangeHRs();
 
+                    /// Find the corresponding values, performing linear interpolation if necessary.
+                    /// Then, report each of them and determine the corresponding state.
+                    double BP_sys = findBP_Sys(time_for_score);
+
+                    /// Calculate health score.
 
 
                 } else {
@@ -244,6 +259,7 @@ void main() {
 
 
 /// Definitions of functions. They appear in the order that they are used in main() above.
+
 
 
 /// Reads the data in from the folder specified by the user.
@@ -383,6 +399,7 @@ void readDataIn(char filename[255]) {
             fclose(infile3);
         }
 }
+
 
 
 
@@ -739,6 +756,11 @@ double maxHR(double timestart, double timestop) {
 }
 
 
+
+
+
+
+
 /// Orders the BP array by increasing timestamps.
 void arrangeBPs() {
 
@@ -800,7 +822,6 @@ void arrangeBTs() {
 
 
 
-
 /// Functions exactly like previous arrangement functions, but for HRs.
 void arrangeHRs() {
 
@@ -827,6 +848,58 @@ void arrangeHRs() {
 
 
 
+/// Calculates the systolic BP for the health score at a given a time.
+/// Loops through the systolic blood pressures, checking to see if the specified time value falls between
+/// any two timestamps. If so, it uses linear interpolation to find the value. If the time value matches an
+/// existing timestamp, it reports the average of all values.
+double findBP_Sys(double time) {
+
+    double BPS;
+    double holderBPS = 0;
+    int countBP = 0;
+    int t;
+
+    for (t = 0; t < NUM_BP_MEASUREMENTS; t++)
+            {
+
+                if (time > BP[t].timestamp && time < BP[t+1].timestamp)
+                    {
+                        double x0 = BP[t].timestamp;
+                        double x1 = BP[t+1].timestamp;
+
+                        double yS0 = BP[t].systolic;
+                        double yS1 = BP[t+1].systolic;
+
+                        ///full equation to solve for the linear interpolation of systolic BP
+                        BPS = yS0 + ((yS1 - yS0) / (x1 - x0)) * (time - x0);
+
+                    } else if (time == BP[t].timestamp)
+                    {
+
+                        ///counter to count the number of times a time value is repeated
+                        countBP++;
+
+                        /// Running sums of the repeated values.
+                        holderBPS += BP[t].systolic;
+
+                        ///takes the average diastolic and systolic values at that time
+                        BPS = holderBPS / countBP;
+
+                    }
+            }
+
+    return BPS;
+}
+
+
+
+
+
+
+/// Takes a blood pressure as an input. Prints out the value. Classifies it as hypertensive, prehypertensive, or normal.
+/// Also contains a flag to determine whether to report it as diastolic or systolic.
+void reportState_BP(double bloodpressure, int sys) {
+}
 
 /// Helper function: Deals with creating small, formatted tables of statistical parameters.
 /// All values will be rounded to two decimal places.
