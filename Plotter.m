@@ -12,7 +12,7 @@
 % as separate lines on each graph. 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% DATA INPUT BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the directory containing the files from the user.
 % working_dir = input('Please enter the location of the directory containing the files to read in.', 's');
@@ -51,12 +51,10 @@ for current_type = file_types
             
             case 'BT'
                 
-                % Read in the first two columns. Ignore the units by matching
-                % them directly with textscan.
+                % Read in the first two columns. Ignore the units.
                 inputBuffer = cell2mat( textscan(current_file, '%f\t%f\tmW') );
             
-                % Then convert the buffer to a matrix for ease of use and jam it in the
-                % appropriate data set.
+                % Then convert the buffer to a matrix 
                 BT_data{current_num}(:, :) = inputBuffer;
             
             case 'HR'
@@ -84,11 +82,30 @@ fclose('all');
 BT_combined = combineDataSet(BT_data, 0);
 BP_combined = combineDataSet(BP_data, 1);
 HR_combined = combineDataSet(HR_data, 0);
+
 BT_averaged = averageData(BT_combined, 0);
 BP_averaged = averageData(BP_combined, 1);
 HR_averaged = averageData(HR_combined, 0);
 
-%%%%%%%%%%%%%%%%%%%%%%%%% END DATA INPUT BLOCK %%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOTTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Plot of body temperature data.
+figure;
+    plot(BT_data{1}(:, 1), BT_data{1}(:, 2), "k"); hold on;
+    plot(BT_data{2}(:, 1), BT_data{2}(:, 2), "b"); hold on;
+    plot(BT_data{3}(:, 1), BT_data{3}(:, 2), "r"); hold on;
+    plot(BT_data{4}(:, 1), BT_data{4}(:, 2), "g"); hold on;
+    plot(BT_data{5}(:, 1), BT_data{5}(:, 2), "m");
+    legend("File 1", "File 2", "File 3", "File 4", "File 5");
+    title("All Body Temperature Data");
+    grid on;
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%% FUNCTION DEFINITIONS %%%%%%%%%%%%%%%%%%%%%%%
 
 % Combines the data sets passed to it. Sums recurring entries.
 % Also notes the number of times each value occurs.
@@ -104,10 +121,10 @@ function q = combineDataSet(data_array, isbp)
     
     % Load each subsequent data file into a temporary array and start
     % comparing its time values to those in the existing combined array.
-    for cell_entry = [2 : 5]
+    for cell_index = [2 : 5]
         
         size_combined = size(combined_dataset);
-        working_mat = data_array{cell_entry}(:, :);
+        working_mat = data_array{cell_index}(:, :);
         size_working = size(working_mat);
             
             for working_row_index = [1 : size_working(1)]
@@ -169,7 +186,9 @@ function q = averageData(input_set, isbp)
         
         % As usual, we have a special case for blood pressure data.
         if isbp ~= 0
+                
             input_set(working_row, input_cols - 2) = input_set(working_row, input_cols - 2) / input_set(working_row, input_cols);
+        
         end
 
     end
