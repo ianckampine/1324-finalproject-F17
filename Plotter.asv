@@ -143,14 +143,8 @@ figure;
 
 % Plot of the average values.
 figure;
-    plot(BT_averaged(:, 1), BT_averaged(:, 2), "k"); hold on;
-    plot(HR_averaged(:, 1), HR_averaged(:, 2), "b"); hold on;
-    plot(BP_averaged(:, 1), BP_averaged(:, 2), "r"); hold on;
-    plot(BP_averaged(:, 1), BP_averaged(:, 2), "g");
-    legend("Mean BT", "Mean HR", "Mean Systolic BP", "Mean Diastolic BP", "Location", "northwest");
-    axis([0 100 70 125]);
-    title("Mean Measurements for All Data Types");
-    grid on;
+    plot(BT_averaged(:, 1), BT_averaged(:, 2), "k");
+    plot(HR_averaged(:, 
     
 %%%%%%%%%%%%%%%%%%%%%%%%% FUNCTION DEFINITIONS %%%%%%%%%%%%%%%%%%%%%%%
 
